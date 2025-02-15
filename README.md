@@ -37,3 +37,7 @@ zig build run
 > There is also a `zig build spy` command.
 
 :seedling:
+
+## Screenshot
+
+![Firefly Zero app showing the Zig logo](https://assets.c7.se/imgur/fBWmZgU.png)
