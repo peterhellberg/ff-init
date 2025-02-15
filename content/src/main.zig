@@ -1,5 +1,6 @@
 const ff = @import("ff");
 
+var buf: [1735]u8 = undefined;
 var fff: ff.Font = undefined;
 var btn: ff.Buttons = undefined;
 var pad: ff.Pad = undefined;
@@ -9,8 +10,6 @@ pub export fn boot() void {
     ff.setColorHex(.gray, 0x292929);
     ff.setColorHex(.white, 0xffffff);
     ff.setColorHex(.orange, 0xf7a41d);
-
-    var buf: [1735]u8 = undefined;
 
     fff = ff.loadFile("font", buf[0..]);
 }
@@ -26,11 +25,8 @@ pub export fn render() void {
     ff.clearScreen(.black);
 
     renderPad();
-    renderZigLogo(.{
-        .x = 3 + @divExact(pad.x, 500),
-        .y = 6 + -@divExact(pad.y, 500),
-    });
     renderButtons();
+    renderZigLogo(.{ .x = 3 + @divExact(pad.x, 500), .y = 6 + -@divExact(pad.y, 500) });
 }
 
 fn renderZigLogo(offset: ff.Point) void {
