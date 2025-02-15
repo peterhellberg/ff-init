@@ -1,0 +1,11 @@
+.{
+    .name = "ff-author-id.ff-app-id",
+    .version = "0.0.0",
+    .paths = .{""},
+    .dependencies = .{
+        .ff = .{
+            .url = "https://github.com/peterhellberg/ff/archive/refs/tags/v0.0.2.zip",
+            .hash = "122018256c31d5e8381f055c404844964d74ad12d8149425105d74642a818a7890d9",
+        },
+    },
+}

@@ -1,0 +1,7 @@
+app_id = "ff-app-id"
+app_name = "ff-app-name"
+author_id = "ff-author-id"
+author_name = "ff-author-name"
+
+[files]
+font = { path = "eg_6x12.fff" }
