@@ -14,12 +14,19 @@ import (
 //go:embed all:content
 var content embed.FS
 
+const (
+	defaultHostname   = "play.c7.se"
+	defaultServerRoot = "/var/www/play.c7.se"
+)
+
 type config struct {
 	dir        string
 	appID      string
 	appName    string
 	authorID   string
 	authorName string
+	hostname   string
+	serverRoot string
 }
 
 func main() {
@@ -53,6 +60,8 @@ func run(args []string, stderr io.Writer) error {
 	flags.StringVar(&cfg.appName, "app-name", "", "Name of the Firefly Zero app")
 	flags.StringVar(&cfg.authorID, "author-id", current.Username, "ID of the Firefly Zero author")
 	flags.StringVar(&cfg.authorName, "author-name", current.Name, "Name of the Firefly Zero author")
+	flags.StringVar(&cfg.hostname, "hostname", defaultHostname, "The hostname to deploy the Firefly Zero app to")
+	flags.StringVar(&cfg.serverRoot, "server-root", defaultServerRoot, "The root path on the server the app should be uploaded to")
 
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
@@ -142,6 +151,13 @@ type dataFunc func(config, string, []byte) []byte
 
 func replacer(cfg config, name string, data []byte) []byte {
 	switch name {
+	case "Makefile":
+		data = replaceOne(data, "ff-app-id", cfg.appID)
+		data = replaceOne(data, "ff-author-id", cfg.authorID)
+		data = replaceOne(data, "localhost", cfg.hostname)
+		data = replaceOne(data, "/tmp", cfg.serverRoot)
+
+		return data
 	case "firefly.toml":
 		data = replaceOne(data, "ff-app-id", cfg.appID)
 		data = replaceOne(data, "ff-app-name", cfg.appName)
