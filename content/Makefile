@@ -6,21 +6,22 @@ APP_PATH=ff/${APP_ID}
 APP_URL=https://${HOSTNAME}/${APP_PATH}
 SERVER_ROOT=/tmp
 SERVER_PATH=${SERVER_ROOT}/${APP_PATH}
+SHOTS_DIR=~/.local/share/firefly/data/${AUTHOR_ID}/${APP_ID}/shots
 
 .PHONY: all
 all: spy
 
 .PHONY:
 spy:
-	zig build spy
+	@zig build spy
 
 .PHONY:
 run:
-	zig build run
+	@zig build run
 
 .PHONY: build
 build:
-	zig build
+	@firefly_cli build
 
 .PHONY: export
 export: build
@@ -38,3 +39,8 @@ deploy: export
 	@echo "✔ Updated ${APP_ID} on ${APP_URL}"
 	@scp -q ${ARCHIVE} ${HOSTNAME}:${SERVER_PATH}/rom/${ARCHIVE}
 	@echo "✔ Archive ${APP_URL}/rom/${ARCHIVE}"
+	@if [ -d ${SHOTS_DIR} ]; then \
+		ssh ${HOSTNAME} 'mkdir -p ${SERVER_PATH}/shots'; \
+		scp -q -r ${SHOTS_DIR}/*.png ${HOSTNAME}:${SERVER_PATH}/shots/; \
+		echo "✔ Screens ${APP_URL}/shots/?layout=grid"; \
+	fi
