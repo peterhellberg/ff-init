@@ -5,14 +5,14 @@ var btn: ff.Buttons = undefined;
 var pad: ff.Pad = undefined;
 
 pub export fn boot() void {
+    ff.setColorHex(.black, 0x000000);
+    ff.setColorHex(.gray, 0x292929);
+    ff.setColorHex(.white, 0xffffff);
+    ff.setColorHex(.orange, 0xf7a41d);
+
     var buf: [1735]u8 = undefined;
 
     fff = ff.loadFile("font", buf[0..]);
-
-    ff.setColor(.black, .{ .r = 0x00, .g = 0x00, .b = 0x00 });
-    ff.setColor(.gray, .{ .r = 0x29, .g = 0x29, .b = 0x29 });
-    ff.setColor(.white, .{ .r = 0xff, .g = 0xff, .b = 0xff });
-    ff.setColor(.orange, .{ .r = 0xf7, .g = 0xa4, .b = 0x1d });
 }
 
 pub export fn update() void {
@@ -25,21 +25,20 @@ pub export fn update() void {
 pub export fn render() void {
     ff.clearScreen(.black);
 
-    const px = @divExact(pad.x, 500);
-    const py = -@divExact(pad.y, 500);
-
     renderPad();
-    renderZigLogo(.{ .x = 3 + px, .y = 6 + py });
+    renderZigLogo(.{
+        .x = 3 + @divExact(pad.x, 500),
+        .y = 6 + -@divExact(pad.y, 500),
+    });
     renderButtons();
 }
 
 fn renderZigLogo(offset: ff.Point) void {
+    const x = offset.x;
+    const y = offset.y;
     const w = ff.Style{ .fill_color = .white };
     const o = ff.Style{ .fill_color = .orange };
     const b = ff.Style{ .fill_color = .black };
-
-    const x = offset.x;
-    const y = offset.y;
 
     rect(x + 2, y + 13, 92, 57, o);
     rect(x + 109, y + 13, 50, 11, w);
