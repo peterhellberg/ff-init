@@ -122,7 +122,7 @@ func run(args []string, stderr io.Writer) error {
 		}
 	}
 
-	return nil
+	return os.Chmod("spy.sh", 0o755)
 }
 
 func writeFile(cfg config, name string, dataFuncs ...dataFunc) error {
