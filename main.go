@@ -17,6 +17,8 @@ var content embed.FS
 const (
 	defaultHostname   = "play.c7.se"
 	defaultServerRoot = "/var/www/play.c7.se"
+
+	maxIDLength = 16
 )
 
 type config struct {
@@ -88,6 +90,14 @@ func run(args []string, stderr io.Writer) error {
 		}
 	}
 
+	if err := validateID("app", cfg.appID); err != nil {
+		return err
+	}
+
+	if err := validateID("author", cfg.authorID); err != nil {
+		return err
+	}
+
 	// Make sure that dir does not already exist
 	if _, err := os.Stat(cfg.dir); !os.IsNotExist(err) {
 		return fmt.Errorf("%q already exists", cfg.dir)
@@ -132,6 +142,43 @@ func run(args []string, stderr io.Writer) error {
 	}
 
 	return os.Chmod("spy.sh", 0o755)
+}
+
+func validateID(typ, id string) error {
+	if id == "" {
+		return fmt.Errorf("%s-id is empty", typ)
+	}
+
+	if len(id) > maxIDLength {
+		return fmt.Errorf("%s-id too long", typ)
+	}
+
+	if strings.HasPrefix(id, "-") {
+		return fmt.Errorf("%s-id has - prefix", typ)
+	}
+
+	if strings.HasSuffix(id, "-") {
+		return fmt.Errorf("%s-id has - suffix", typ)
+	}
+
+	if strings.Contains(id, "--") {
+		return fmt.Errorf("%s-id contains --", typ)
+	}
+
+	if !onlyAllowedRunes(id) {
+		return fmt.Errorf("%s-id contains something not allowed: %q", typ, id)
+	}
+
+	return nil
+}
+
+func onlyAllowedRunes(s string) bool {
+	for _, c := range s {
+		if c != '-' && (c < '0' || c > '9') && (c < 'a' || c > 'z') {
+			return false
+		}
+	}
+	return true
 }
 
 func writeFile(cfg config, name string, dataFuncs ...dataFunc) error {
