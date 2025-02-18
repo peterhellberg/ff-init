@@ -36,6 +36,11 @@ zig build run
 > [!Note]
 > There is also a `zig build spy` command.
 
+> [!Tip]
+> If you want minimal output then you can use the `-minimal` flag.
+>
+> _(List all of the available flags with `-help`)_
+
 :seedling:
 
 ## Screenshot
