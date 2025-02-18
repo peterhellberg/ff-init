@@ -14,9 +14,13 @@ import (
 //go:embed all:content
 var content embed.FS
 
+//go:embed all:minimal
+var minimal embed.FS
+
 const (
 	defaultHostname   = "play.c7.se"
 	defaultServerRoot = "/var/www/play.c7.se"
+	defaultMinimal    = false
 
 	maxIDLength = 16
 )
@@ -29,6 +33,7 @@ type config struct {
 	authorName string
 	hostname   string
 	serverRoot string
+	minimal    bool
 }
 
 func main() {
@@ -64,6 +69,7 @@ func run(args []string, stderr io.Writer) error {
 	flags.StringVar(&cfg.authorName, "author-name", current.Name, "Name of the Firefly Zero author")
 	flags.StringVar(&cfg.hostname, "hostname", defaultHostname, "The hostname to deploy the Firefly Zero app to")
 	flags.StringVar(&cfg.serverRoot, "server-root", defaultServerRoot, "The root path on the server the app should be uploaded to")
+	flags.BoolVar(&cfg.minimal, "minimal", defaultMinimal, "Should the minimal template be used or not")
 
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
@@ -113,7 +119,19 @@ func run(args []string, stderr io.Writer) error {
 		return err
 	}
 
-	entries, err := content.ReadDir("content")
+	var (
+		writeFile = contentWriteFile
+		srcFS     = content
+		srcBase   = "content"
+	)
+
+	if cfg.minimal {
+		writeFile = minimalWriteFile
+		srcFS = minimal
+		srcBase = "minimal"
+	}
+
+	entries, err := srcFS.ReadDir(srcBase)
 	if err != nil {
 		return err
 	}
@@ -125,7 +143,7 @@ func run(args []string, stderr io.Writer) error {
 			}
 		} else {
 			if e.Name() == "src" {
-				srcEntries, err := content.ReadDir("content/src")
+				srcEntries, err := srcFS.ReadDir(srcBase + "/src")
 				if err != nil {
 					return err
 				}
@@ -181,10 +199,25 @@ func onlyAllowedRunes(s string) bool {
 	return true
 }
 
-func writeFile(cfg config, name string, dataFuncs ...dataFunc) error {
+type writeFileFunc func(cfg config, name string, dataFuncs ...dataFunc) error
+
+func contentWriteFile(cfg config, name string, dataFuncs ...dataFunc) error {
 	data, err := content.ReadFile("content/" + name)
 	if err != nil {
-		return fmt.Errorf("writeFile: %w", err)
+		return fmt.Errorf("contentWriteFile: %w", err)
+	}
+
+	for i := range dataFuncs {
+		data = dataFuncs[i](cfg, name, data)
+	}
+
+	return os.WriteFile(name, data, 0o644)
+}
+
+func minimalWriteFile(cfg config, name string, dataFuncs ...dataFunc) error {
+	data, err := minimal.ReadFile("minimal/" + name)
+	if err != nil {
+		return fmt.Errorf("minimalWriteFile: %w", err)
 	}
 
 	for i := range dataFuncs {
