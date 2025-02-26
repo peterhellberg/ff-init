@@ -36,14 +36,7 @@ type config struct {
 	minimal    bool
 }
 
-func main() {
-	if err := run(os.Args, os.Stderr); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	}
-}
-
-func run(args []string, stderr io.Writer) error {
+func parse(args []string, stderr io.Writer) (config, error) {
 	var cfg config
 
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
@@ -60,7 +53,7 @@ func run(args []string, stderr io.Writer) error {
 
 	current, err := user.Current()
 	if err != nil {
-		return err
+		return cfg, err
 	}
 
 	flags.StringVar(&cfg.appID, "app-id", "", "ID of the Firefly Zero app")
@@ -72,14 +65,14 @@ func run(args []string, stderr io.Writer) error {
 	flags.BoolVar(&cfg.minimal, "minimal", defaultMinimal, "Should the minimal template be used or not")
 
 	if err := flags.Parse(args[1:]); err != nil {
-		return err
+		return cfg, err
 	}
 
 	rest := flags.Args()
 
 	// Require a directory name
 	if len(rest) < 1 {
-		return fmt.Errorf("no name given as the first argument")
+		return cfg, fmt.Errorf("no name given as the first argument")
 	}
 
 	cfg.dir = rest[0]
@@ -97,10 +90,26 @@ func run(args []string, stderr io.Writer) error {
 	}
 
 	if err := validateID("app", cfg.appID); err != nil {
-		return err
+		return cfg, err
 	}
 
 	if err := validateID("author", cfg.authorID); err != nil {
+		return cfg, err
+	}
+
+	return cfg, nil
+}
+
+func main() {
+	if err := run(os.Args, os.Stderr); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(args []string, stderr io.Writer) error {
+	cfg, err := parse(args, stderr)
+	if err != nil {
 		return err
 	}
 
