@@ -1,5 +1,6 @@
 .{
-    .name = "ff-author-id.ff-app-id",
+    .name = .ff_app_name,
+    .fingerprint = 0x9cdb93c8c3a4327e,
     .version = "0.0.0",
     .paths = .{""},
     .dependencies = .{
