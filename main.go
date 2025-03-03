@@ -1,13 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"embed"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
@@ -34,6 +37,12 @@ type config struct {
 	hostname   string
 	serverRoot string
 	minimal    bool
+	zon        ZON
+}
+
+type ZON struct {
+	name        string
+	fingerprint string
 }
 
 func parse(args []string, stderr io.Writer) (config, error) {
@@ -96,6 +105,15 @@ func parse(args []string, stderr io.Writer) (config, error) {
 	if err := validateID("author", cfg.authorID); err != nil {
 		return cfg, err
 	}
+
+	id := fmt.Sprintf("%s.%s", cfg.authorID, cfg.appID)
+
+	zon, err := initZON(id)
+	if err != nil {
+		return cfg, err
+	}
+
+	cfg.zon = zon
 
 	return cfg, nil
 }
@@ -259,9 +277,14 @@ func replacer(cfg config, name string, data []byte) []byte {
 		data = replaceOne(data, "ff-author-id", cfg.authorID)
 
 		return data
-	case "build.zig.zon", "README.md":
+	case "README.md":
 		data = replaceOne(data, "ff-app-id", cfg.appID)
 		data = replaceOne(data, "ff-author-id", cfg.authorID)
+
+		return data
+	case "build.zig.zon":
+		data = replaceOne(data, ".ff_app_name", cfg.zon.name)
+		data = replaceOne(data, "0x9cdb93c8c3a4327e", cfg.zon.fingerprint)
 
 		return data
 	default:
@@ -271,4 +294,65 @@ func replacer(cfg config, name string, data []byte) []byte {
 
 func replaceOne(data []byte, old, new string) []byte {
 	return bytes.Replace(data, []byte(old), []byte(new), 1)
+}
+
+func initZON(dir string) (ZON, error) {
+	tmp, err := os.MkdirTemp("", "ff-init-")
+	if err != nil {
+		return ZON{}, err
+	}
+	defer os.RemoveAll(tmp)
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		return ZON{}, err
+	}
+	defer os.Chdir(cwd)
+
+	tmpDir := filepath.Join(tmp, dir)
+
+	if err := os.Mkdir(tmpDir, 0o755); err != nil {
+		return ZON{}, err
+	}
+
+	if err := os.Chdir(tmpDir); err != nil {
+		return ZON{}, err
+	}
+
+	cmd := exec.Command("zig", "init")
+
+	if err := cmd.Run(); err != nil {
+		return ZON{}, err
+	}
+
+	zonPath := filepath.Join(tmpDir, "build.zig.zon")
+
+	return extractZON(zonPath)
+}
+
+func extractZON(zonPath string) (ZON, error) {
+	var zon ZON
+
+	f, err := os.Open(zonPath)
+	if err != nil {
+		return zon, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		text := strings.TrimSpace(scanner.Text())
+
+		if prefix := ".name = "; strings.Contains(text, prefix) {
+			zon.name = strings.TrimSuffix(strings.TrimPrefix(text, prefix), ",")
+		}
+
+		if prefix := ".fingerprint = "; strings.Contains(text, prefix) {
+			fingerprint, _, _ := strings.Cut(strings.TrimPrefix(text, prefix), ",")
+			zon.fingerprint = fingerprint
+		}
+	}
+
+	return zon, nil
 }
