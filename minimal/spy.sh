@@ -3,4 +3,4 @@
 killall -q firefly-emulator
 
 firefly_cli build && \
-firefly-emulator
+firefly-emulator --id "ff-author-id.ff-app-id"
