@@ -5,8 +5,8 @@
     .paths = .{""},
     .dependencies = .{
         .ff = .{
-            .url = "https://github.com/peterhellberg/ff/archive/refs/tags/v0.1.2.zip",
-            .hash = "1220edd3f09fb543580b937628d6ef491b710182140236580cf011eb45c01e082c51",
+            .url = "https://github.com/peterhellberg/ff/archive/refs/tags/v0.1.3.zip",
+            .hash = "ff-0.1.3-dm5vtOndAADouwUrsPufre83VtyA1jNpCDT7k1uHlY4X",
         },
     },
 }
