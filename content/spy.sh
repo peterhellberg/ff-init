@@ -2,5 +2,5 @@
 
 killall -q firefly-emulator
 
-firefly_cli build && \
-firefly-emulator --id "ff-author-id.ff-app-id"
+firefly_cli build --no-tip && \
+firefly_cli emulator -- --id "ff-author-id.ff-app-id"
