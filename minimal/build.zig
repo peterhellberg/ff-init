@@ -22,10 +22,16 @@ pub fn build(b: *std.Build) !void {
 
     b.installArtifact(exe);
 
-    const build_cmd = b.addSystemCommand(&[_][]const u8{ "firefly_cli", "build" });
+    const build_cmd = b.addSystemCommand(&[_][]const u8{
+        "firefly_cli",
+        "build",
+        "--no-tip",
+    });
 
     const run_cmd = b.addSystemCommand(&[_][]const u8{
-        "firefly-emulator",
+        "firefly_cli",
+        "emulator",
+        "--",
         "--id",
         id,
     });
@@ -37,7 +43,7 @@ pub fn build(b: *std.Build) !void {
     const spy_cmd = b.addSystemCommand(&[_][]const u8{
         "spy",
         "--exc",
-        "zig-cache",
+        ".zig-cache",
         "--inc",
         "**/*.zig",
         "-q",
