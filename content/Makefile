@@ -21,7 +21,7 @@ run:
 
 .PHONY: build
 build:
-	@firefly_cli build
+	@firefly_cli build --no-tip
 
 .PHONY: export
 export: build
