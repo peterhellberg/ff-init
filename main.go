@@ -277,7 +277,7 @@ func replacer(cfg config, name string, data []byte) []byte {
 		data = replaceOne(data, "ff-author-id", cfg.authorID)
 
 		return data
-	case "README.md", "spy.sh":
+	case "README.md":
 		data = replaceOne(data, "ff-app-id", cfg.appID)
 		data = replaceOne(data, "ff-author-id", cfg.authorID)
 
