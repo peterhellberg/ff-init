@@ -22,20 +22,11 @@ pub fn build(b: *std.Build) !void {
 
     b.installArtifact(exe);
 
-    const build_cmd = b.addSystemCommand(&[_][]const u8{
-        "firefly_cli",
-        "build",
-        "--no-tip",
-    });
-
     const run_cmd = b.addSystemCommand(&[_][]const u8{
         "firefly_cli",
-        "emulator",
-        "--",
-        "--id",
-        id,
+        "run",
+        "--no-tip",
     });
-    run_cmd.step.dependOn(&build_cmd.step);
 
     const run_step = b.step("run", "Run app in the Firefly Zero emulator");
     run_step.dependOn(&run_cmd.step);
