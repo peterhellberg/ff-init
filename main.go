@@ -14,10 +14,10 @@ import (
 	"strings"
 )
 
-//go:embed all:content
+//go:embed content/.gitignore content/Makefile content/*.md content/*.sh content/*.toml content/*.zig content/*.zon content/*.fff content/src
 var content embed.FS
 
-//go:embed all:minimal
+//go:embed minimal/.gitignore minimal/Makefile minimal/*.md minimal/*.sh minimal/*.toml minimal/*.zig minimal/*.zon minimal/src
 var minimal embed.FS
 
 const (
