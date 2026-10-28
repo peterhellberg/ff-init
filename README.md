@@ -9,10 +9,10 @@ allows you to promptly get started coding on an app (or game) for the
 lovely little WebAssembly console [Firefly Zero](https://fireflyzero.com/).
 
 The Zig build `.target` is declared as `.{ .cpu_arch = .wasm32, .os_tag = .freestanding }`
-and `.optimize` is set to `.ReleaseSmall`
+and `.optimize` is set to `.small`
 
 > [!Important]
-> No need to specify `-Doptimize=ReleaseSmall`
+> No need to specify `-release=small`
 
 ## Installation
 
